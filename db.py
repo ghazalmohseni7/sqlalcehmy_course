@@ -1,8 +1,10 @@
 import os
+from typing import Any
 from functools import lru_cache
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
+from sqlalchemy.orm import declarative_base, DeclarativeBase
 
 load_dotenv()
 
@@ -20,3 +22,14 @@ def get_engine() -> AsyncEngine:
     db_max_overflow: int = int(os.getenv("DB_MAX_OVERFLOW"))
     dialect: str = f"{db_type}+{db_driver}://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
     return create_async_engine(url=dialect, pool_size=db_pool_size, max_overflow=db_max_overflow)
+
+
+@lru_cache
+def get_base() -> Any:
+    # used for sqlalchemy veriosn < 2.0
+    return declarative_base()
+
+
+class Base(DeclarativeBase):
+    # used for sqlalchemy veriosn >=2.0
+    pass
