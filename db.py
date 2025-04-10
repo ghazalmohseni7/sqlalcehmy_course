@@ -32,4 +32,4 @@ def get_base() -> Any:
 
 class Base(DeclarativeBase):
     # used for sqlalchemy veriosn >=2.0
-    pass
+    ...
