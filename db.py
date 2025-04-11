@@ -21,7 +21,7 @@ def get_engine() -> AsyncEngine:
     db_pool_size: int = int(os.getenv("DB_POOL_SIZE"))
     db_max_overflow: int = int(os.getenv("DB_MAX_OVERFLOW"))
     dialect: str = f"{db_type}+{db_driver}://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
-    return create_async_engine(url=dialect, pool_size=db_pool_size, max_overflow=db_max_overflow)
+    return create_async_engine(url=dialect, pool_size=db_pool_size, max_overflow=db_max_overflow, echo=True)
 
 
 @lru_cache
