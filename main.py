@@ -16,10 +16,10 @@ async def apply_tables() -> None:
         async with engine.begin() as conn:
 
             # lets check the connection to db:
-            result = await conn.execute(text('SELECT version();'))
-            version = result.all()[0]  # Get the first column of the first row
-            print(f"Connected to: {version}")
-            # await conn.run_sync(Base.metadata.drop_all)  # Drop tables if they exist
+            # result = await conn.execute(text('SELECT version();'))
+            # version = result.all()[0]  # Get the first column of the first row
+            # print(f"Connected to: {version}")
+            await conn.run_sync(Base.metadata.drop_all)  # Drop tables if they exist
             await conn.run_sync(Base.metadata.create_all)  # Create the tables
             print("Tables applied successfully.")
             print(
