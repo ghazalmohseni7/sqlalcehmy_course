@@ -1,7 +1,9 @@
 import os
 from typing import Any
+from datetime import datetime
 from functools import lru_cache
 from dotenv import load_dotenv
+from sqlalchemy import types
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.orm import declarative_base, DeclarativeBase
@@ -32,4 +34,6 @@ def get_base() -> Any:
 
 class Base(DeclarativeBase):
     # used for sqlalchemy veriosn >=2.0
-    ...
+    type_annotation_map = {
+        datetime: types.DateTime(timezone=True),  # from now on in this project every datetime column has timezone too
+    }
