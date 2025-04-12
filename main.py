@@ -103,12 +103,27 @@ async def select_with_where():
     print(res1.all())
 
 
+async def update_product():
+    engine = get_engine()
+    query = sqla.update(PyProduct).where(PyProduct.id == 1).values({
+        PyProduct.price: round(uniform(1.0, 100.0), 2),
+        PyProduct.available_quantity: randint(1, 50),
+    }).returning(PyProduct)
+    async with engine.begin() as conn:
+        res = await conn.execute(query)
+
+    print(res.all())
+
+
+
+
 if __name__ == "__main__":
     # asyncio.run(apply_tables())
     # asyncio.run(insert_product())
     # asyncio.run(select_star())
     # asyncio.run(select_some_columns())
-    asyncio.run(select_with_where())
+    # asyncio.run(select_with_where())
+    asyncio.run(update_product())
 
 # from sqlalchemy import create_engine
 #
