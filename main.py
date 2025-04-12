@@ -89,11 +89,26 @@ async def select_some_columns():
             row._asdict())  # reutrns dict ;{'id': 12, 'name': 'enjoy', 'price': 39.05, 'available_quantity': 18, 'production_date': None, 'expiry_date': None, 'expiry_offset_months': None}
 
 
+async def select_with_where():
+    engine = get_engine()
+    start_date = date(2025, 1, 1)
+    end_date = date(2026, 12, 31)
+    query = sqla.select(PyProduct).where((PyProduct.production_date >= start_date) &
+                                         (PyProduct.expiry_date < end_date))
+    query1 = sqla.select(PyProduct).where(PyProduct.price.between(1.0, 6.0))
+    async with engine.begin() as conn:
+        res = await conn.execute(query)
+        res1 = await conn.execute(query1)
+    print(res.all())
+    print(res1.all())
+
+
 if __name__ == "__main__":
     # asyncio.run(apply_tables())
     # asyncio.run(insert_product())
     # asyncio.run(select_star())
-    asyncio.run(select_some_columns())
+    # asyncio.run(select_some_columns())
+    asyncio.run(select_with_where())
 
 # from sqlalchemy import create_engine
 #
