@@ -63,9 +63,23 @@ async def insert_product():
         """
 
 
+async def select_star():
+    engine = get_engine()
+    query = sqla.select(PyProduct)
+    async with engine.begin() as conn:
+        result = await conn.execute(query)
+    all_result = result.all()
+    print(all_result)  # list of tuples
+    for row in all_result:
+        print(row)  # reutrns tuple :(12, 'enjoy', 39.05, 18, None, None, None)
+        print(
+            row._asdict())  # reutrns dict ;{'id': 12, 'name': 'enjoy', 'price': 39.05, 'available_quantity': 18, 'production_date': None, 'expiry_date': None, 'expiry_offset_months': None}
+
+
 if __name__ == "__main__":
     # asyncio.run(apply_tables())
-    asyncio.run(insert_product())
+    # asyncio.run(insert_product())
+    asyncio.run(select_star())
 
 # from sqlalchemy import create_engine
 #
