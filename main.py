@@ -1,5 +1,8 @@
 import asyncio
 import sys
+from random import uniform, randint
+from faker import Faker
+import sqlalchemy as sqla
 from sqlalchemy import text
 from db import get_engine, Base
 
@@ -7,6 +10,8 @@ from models import *  # if we dont do this then sqlalchemy dont know anything ab
 
 if sys.platform:
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+fake = Faker()
 
 
 async def apply_tables() -> None:
@@ -28,8 +33,39 @@ async def apply_tables() -> None:
         print(f"Error: {e}")
 
 
+async def insert_product():
+    engine = get_engine()
+    query = sqla.insert(PyProduct).values({
+        PyProduct.name: fake.word(),
+        PyProduct.price: round(uniform(1.0, 100.0), 2),
+        PyProduct.available_quantity: randint(1, 50),
+        #
+        # PyProduct.production_date: ,
+        # PyProduct.expiry_date:,
+        # PyProduct.expiry_offset_months: ,
+    }
+
+    ).returning(PyProduct.id)
+    async with engine.begin() as conn:
+        result = await conn.execute(query)
+        # print("insert result: ", result.all()) # returns a list contains a tupple which in tuple ther is a id
+        # print("insert result: ", result.first()) # returns  a tuple
+        # list_result=result.all()
+        firts_resukt = result.first()
+        # print("insert result: ", list_result[0]) # returns  a tuple
+        # print("insert result: ", firts_resukt._tuple())# returns  a tuple
+        print("insert result: ", firts_resukt._asdict())  # returns  a dict : {'id': 12}
+        """
+        you can not do this:
+        result.all()
+        result.first()
+        cause the first line will fetch data from db and then there is nothing for second line to fetch
+        """
+
+
 if __name__ == "__main__":
-    asyncio.run(apply_tables())
+    # asyncio.run(apply_tables())
+    asyncio.run(insert_product())
 
 # from sqlalchemy import create_engine
 #
