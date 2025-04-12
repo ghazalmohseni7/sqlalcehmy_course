@@ -1,14 +1,14 @@
-from typing import Union
-from sqlalchemy import String
+from datetime import datetime, date
+from sqlalchemy import types
 from sqlalchemy.orm import mapped_column, Mapped
 from db import Base
 
 
-class User(Base):
+class PyUser(Base):
     # this is how we create table for sqlalchemy version >= 2.0
-    __tablename__ = 'users' # psql thinks table names are all lowercase so if you write uppercase letters it cant find them , so alway write tbale names in lower case
+    __tablename__ = 'sqla_user'  # psql thinks table names are all lowercase so if you write uppercase letters it cant find them , so alway write tbale names in lower case
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)  # you should use python types
-    username: Mapped[str] = mapped_column(String(100))  # VARCHAR(100)
+    username: Mapped[str] = mapped_column(types.String(100))  # VARCHAR(100)
     # 3 way to make a column nullable
     # age: Mapped[Union[int | None]] = mapped_column()
     age: Mapped[int | None] = mapped_column()
@@ -24,3 +24,14 @@ class User(Base):
     )
     """
 
+
+class PyProduct(Base):
+    __tablename__ = 'sqla_product'
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(types.String(100), nullable=False)
+    price: Mapped[float] = mapped_column(nullable=False)
+    available_quantity: Mapped[int] = mapped_column(nullable=False)
+
+    production_date: Mapped[date] = mapped_column(types.Date, nullable=True)
+    expiry_date: Mapped[date] = mapped_column(types.Date, nullable=True)
+    expiry_offset_months: Mapped[int] = mapped_column(nullable=True)  # Example: 12 for a year
