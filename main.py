@@ -115,6 +115,13 @@ async def update_product():
     print(res.all())
 
 
+async def delete_product():
+    engine = get_engine()
+    query = sqla.delete(PyProduct).where(PyProduct.id == 3)
+    async with engine.begin() as conn:
+        await conn.execute(query)
+
+    # print(type(res))
 
 
 if __name__ == "__main__":
@@ -123,7 +130,8 @@ if __name__ == "__main__":
     # asyncio.run(select_star())
     # asyncio.run(select_some_columns())
     # asyncio.run(select_with_where())
-    asyncio.run(update_product())
+    # asyncio.run(update_product())
+    asyncio.run(delete_product())
 
 # from sqlalchemy import create_engine
 #
