@@ -1,6 +1,6 @@
 from datetime import datetime, date
 from sqlalchemy import types, ForeignKey
-from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.orm import mapped_column, Mapped, relationship
 from db import Base
 
 
@@ -43,6 +43,7 @@ class PyOrder(Base):
     quantity: Mapped[int] = mapped_column(nullable=False)
     order_date: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     product_id: Mapped[int] = mapped_column(ForeignKey(PyProduct.id, ondelete="CASCADE"))
+    product: Mapped["PyProduct"] = relationship()
 
     """
     CREATE TABLE sqla_order (
