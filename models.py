@@ -1,5 +1,5 @@
 from datetime import datetime, date
-from sqlalchemy import types
+from sqlalchemy import types, ForeignKey
 from sqlalchemy.orm import mapped_column, Mapped
 from db import Base
 
@@ -35,3 +35,22 @@ class PyProduct(Base):
     production_date: Mapped[date] = mapped_column(types.Date, nullable=True)
     expiry_date: Mapped[date] = mapped_column(types.Date, nullable=True)
     expiry_offset_months: Mapped[int] = mapped_column(nullable=True)  # Example: 12 for a year
+
+
+class PyOrder(Base):
+    __tablename__ = 'sqla_order'
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    quantity: Mapped[int] = mapped_column(nullable=False)
+    order_date: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    product_id: Mapped[int] = mapped_column(ForeignKey(PyProduct.id, ondelete="CASCADE"))
+
+    """
+    CREATE TABLE sqla_order (
+        id SERIAL NOT NULL,
+        quantity INTEGER NOT NULL,
+        order_date TIMESTAMP WITH TIME ZONE NOT NULL,
+        product_id INTEGER NOT NULL,
+        PRIMARY KEY (id),
+        FOREIGN KEY(product_id) REFERENCES sqla_product (id) ON DELETE CASCADE
+    )
+    """
