@@ -35,6 +35,8 @@ class PyProduct(Base):
     production_date: Mapped[date] = mapped_column(types.Date, nullable=True)
     expiry_date: Mapped[date] = mapped_column(types.Date, nullable=True)
     expiry_offset_months: Mapped[int] = mapped_column(nullable=True)  # Example: 12 for a year
+    orders: Mapped[list["PyProduct"]] = relationship(
+        back_populates="product")  # this back_populates="product" points to the column with the same name in PyOrder class
 
 
 class PyOrder(Base):
@@ -43,7 +45,8 @@ class PyOrder(Base):
     quantity: Mapped[int] = mapped_column(nullable=False)
     order_date: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     product_id: Mapped[int] = mapped_column(ForeignKey(PyProduct.id, ondelete="CASCADE"))
-    product: Mapped["PyProduct"] = relationship()
+    product: Mapped["PyProduct"] = relationship(
+        back_populates='orders')  # this back_populates='orders' points to the column with the same name in PyProduct class
 
     """
     CREATE TABLE sqla_order (
