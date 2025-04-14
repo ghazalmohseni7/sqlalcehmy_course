@@ -124,6 +124,32 @@ async def delete_product():
     # print(type(res))
 
 
+async def inner_join():
+    # parent class is PyProduct
+    # child class is PyOrder
+    engine = get_engine()
+    query = (  # this paranteses is for chaining methods and have commnets at the same time
+        sqla.select(PyProduct,
+                    PyOrder)  # this select is for define which columns you want , here we write the name of the tables means we want all of the columns
+        .select_from(PyProduct.__table__.join(
+            # this select_from is equivalent of FROM Table in sql , from_table_name.join (join_table_name)
+            PyOrder.__table__,  # join table
+            PyProduct.id == PyOrder.product_id  # ON clause
+        ))
+    )
+    async with engine.begin() as conn:
+        result = await conn.execute(query)
+    print([x._asdict() for x in result.all()])
+    """
+     {'id': 8, 'name': 'peach', 'price': 19.99, 'available_quantity': 3, 'production_date
+    ': datetime.date(2022, 1, 15), 'expiry_date': datetime.date(2005, 11, 9), 'expiry_offset_months': None, 'id_1': 23, 'quantity': 17, 'order_date': datetime.datetime(2005, 8, 18, 19,
+     30, tzinfo=datetime.timezone.utc), 'product_id': 8},
+    """
+    """
+    note : the PyOrder or PyProduct are python class not a real table , so if we want to convert them to table we use : .__table__
+    """
+
+
 if __name__ == "__main__":
     # asyncio.run(apply_tables())
     # asyncio.run(insert_product())
@@ -131,7 +157,8 @@ if __name__ == "__main__":
     # asyncio.run(select_some_columns())
     # asyncio.run(select_with_where())
     # asyncio.run(update_product())
-    asyncio.run(delete_product())
+    # asyncio.run(delete_product())
+    asyncio.run(inner_join())
 
 # from sqlalchemy import create_engine
 #
