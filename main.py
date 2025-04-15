@@ -226,6 +226,29 @@ async def aggregation_count_correct():
     """
 
 
+async def aggregation_sum():
+    engine = get_engine()
+    query = sqla.select(PyOrder.product_id, sqla.func.sum(PyOrder.quantity).label("quantity_per_product")).group_by(
+        PyOrder.product_id)
+    async with engine.begin() as conn:
+        result = await conn.execute(query)
+    print([x._asdict() for x in result.all()])
+
+    """print result : [{'product_id': 11, 'quantity_per_product': 11}, {'product_id': 9, 'quantity_per_product': 12}, 
+    {'product_id': 15, 'quantity_per_product': 5}, {'product_id': 19, 'quantity_per_prod uct': 1}, {'product_id': 17, 
+    'quantity_per_product': 29}, {'product_id': 14, 'quantity_per_product': 12}, {'product_id': 13, 
+    'quantity_per_product': 25}, {'product_id': 16, 'quanti ty_per_product': 19}, {'product_id': 7, 
+    'quantity_per_product': 14}, {'product_id': 24, 'quantity_per_product': 15}, {'product_id': 25, 
+    'quantity_per_product': 36}, {'product_id': 20, 'quantity_per_product': 6}, {'product_id': 23, 
+    'quantity_per_product': 8}, {'product_id': 8, 'quantity_per_product': 17}]"""
+
+    """
+    SELECT sqla_order.product_id, sum(sqla_order.quantity) AS quantity_per_product 
+    FROM sqla_order 
+    GROUP BY sqla_order.product_id
+    """
+
+
 if __name__ == "__main__":
     # asyncio.run(apply_tables())
     # asyncio.run(insert_product())
@@ -238,7 +261,8 @@ if __name__ == "__main__":
     # asyncio.run(left_join())
     # asyncio.run(right_join())
     # asyncio.run(aggregation_count())
-    asyncio.run(aggregation_count_correct())
+    # asyncio.run(aggregation_count_correct())
+    asyncio.run(aggregation_sum())
 
 # from sqlalchemy import create_engine
 #
