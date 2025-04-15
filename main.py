@@ -191,6 +191,40 @@ async def right_join():
     """
 
 
+async def aggregation_count():
+    engine = get_engine()
+    query = sqla.select(PyProduct.id, sqla.func.count(PyProduct.id).label("LEN")).group_by(PyProduct.id)
+    async with engine.begin() as conn:
+        result = await conn.execute(query)
+    print([x._asdict() for x in result.all()])
+
+    """print result : [{'id': 22, 'LEN': 1}, {'id': 15, 'LEN': 1}, {'id': 19, 'LEN': 1}, {'id': 10, 'LEN': 1}, 
+    {'id': 6, 'LEN': 1}, {'id': 14, 'LEN': 1}, {'id': 13, 'LEN': 1}, {'id': 7, 'LEN': 1}, {'id' : 20, 'LEN': 1}, 
+    {'id': 18, 'LEN': 1}, {'id': 8, 'LEN': 1}, {'id': 11, 'LEN': 1}, {'id': 9, 'LEN': 1}, {'id': 21, 'LEN': 1}, 
+    {'id': 17, 'LEN': 1}, {'id': 16, 'LEN': 1}, {'id': 12, 'LEN': 1}, {'id': 24, 'LEN': 1}, {'id': 25, 'LEN': 1}, 
+    {'id': 23, 'LEN': 1}]"""
+
+    """
+    SELECT sqla_product.id, count(sqla_product.id) AS "LEN" 
+    FROM sqla_product 
+    GROUP BY sqla_product.id
+    """
+
+
+async def aggregation_count_correct():
+    engine = get_engine()
+    query = sqla.select(sqla.func.count(PyProduct.id).label("LEN"))
+    async with engine.begin() as conn:
+        result = await conn.execute(query)
+    print([x._asdict() for x in result.all()])
+
+    """print result :[{'LEN': 20}]"""
+
+    """
+    SELECT count(sqla_product.id) AS "LEN" 
+    FROM sqla_product
+    """
+
 
 if __name__ == "__main__":
     # asyncio.run(apply_tables())
@@ -202,7 +236,9 @@ if __name__ == "__main__":
     # asyncio.run(delete_product())
     # asyncio.run(inner_join())
     # asyncio.run(left_join())
-    asyncio.run(right_join())
+    # asyncio.run(right_join())
+    # asyncio.run(aggregation_count())
+    asyncio.run(aggregation_count_correct())
 
 # from sqlalchemy import create_engine
 #
