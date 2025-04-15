@@ -296,10 +296,10 @@ async def aggregation_min_max():
 
     query = (
         sqla.select(
-                    sqla.func.max(PyOrder.quantity).label("max_order_quantity"),
-                    sqla.func.min(PyOrder.quantity).label("min_order_quantity"),
+            sqla.func.max(PyOrder.quantity).label("max_order_quantity"),
+            sqla.func.min(PyOrder.quantity).label("min_order_quantity"),
 
-                    ).select_from(
+        ).select_from(
             PyProduct.__table__.outerjoin(PyOrder.__table__, PyProduct.id == PyOrder.product_id))
     )  # psql do not allows us to do nested aggregations
     async with engine.begin() as conn:
@@ -313,6 +313,35 @@ async def aggregation_min_max():
         FROM sqla_product 
         LEFT OUTER JOIN sqla_order 
         ON sqla_product.id = sqla_order.product_id
+    """
+
+
+async def aggregation_avg_having():
+    engine = get_engine()
+    query = (
+        sqla.select(PyProduct.id.label("product_id"),
+                    sqla.func.avg(PyProduct.price * PyOrder.quantity).label("avg_order_price")).select_from(
+            PyProduct.__table__.outerjoin(PyOrder.__table__, PyProduct.id == PyOrder.product_id)).group_by(
+            PyProduct.id).having(sqla.func.avg(PyProduct.price * PyOrder.quantity) > 200).order_by(PyProduct.id)
+    )
+    async with engine.begin() as conn:
+        result = await conn.execute(query)
+    print([x._asdict() for x in result.all()])
+
+    """print result :[{'product_id': 8, 'avg_order_price': 339.83}, {'product_id': 11, 'avg_order_price': 
+    439.89000000000004}, {'product_id': 13, 'avg_order_price': 249.875}, {'product_id': 16, 'avg_order_price': 
+    949.8100000000001}, {'product_id': 17, 'avg_order_price': 362.35499999999996}, {'product_id': 23, 
+    'avg_order_price': 223.92}]"""
+
+    """
+        SELECT sqla_product.id AS product_id, avg(sqla_product.price * sqla_order.quantity) AS avg_order_price 
+        FROM sqla_product 
+        LEFT OUTER JOIN sqla_order 
+        ON sqla_product.id = sqla_order.product_id 
+        GROUP BY sqla_product.id
+        HAVING avg(sqla_product.price * sqla_order.quantity) > $1::INTEGER 
+        ORDER BY sqla_product.id
+
     """
 
 
@@ -331,7 +360,8 @@ if __name__ == "__main__":
     # asyncio.run(aggregation_count_correct())
     # asyncio.run(aggregation_sum())
     # asyncio.run(aggregation_avg())
-    asyncio.run(aggregation_min_max())
+    # asyncio.run(aggregation_min_max())
+    asyncio.run(aggregation_avg_having())
 
 # from sqlalchemy import create_engine
 #
