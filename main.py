@@ -249,6 +249,40 @@ async def aggregation_sum():
     """
 
 
+async def aggregation_avg():
+    engine = get_engine()
+    query = (
+        sqla.select(PyProduct.id.label("product_id"),
+                    sqla.func.avg(PyProduct.price * PyOrder.quantity).label("avg_order_price")).select_from(
+            PyProduct.__table__.outerjoin(PyOrder.__table__, PyProduct.id == PyOrder.product_id)).group_by(
+            PyProduct.id).order_by(PyProduct.id)
+    )
+    async with engine.begin() as conn:
+        result = await conn.execute(query)
+    print([x._asdict() for x in result.all()])
+
+    """print result :[{'product_id': 6, 'avg_order_price': None}, {'product_id': 7, 'avg_order_price': 62.86}, 
+    {'product_id': 8, 'avg_order_price': 339.83}, {'product_id': 9, 'avg_order_price': 59.88}, {'product_id': 10, 
+    'avg_order_price': None}, {'product_id': 11, 'avg_order_price': 439.89000000000004}, {'product_id': 12, 
+    'avg_order_price': None}, {'product_id': 13, 'avg_order_ price': 249.875}, {'product_id': 14, 'avg_order_price': 
+    77.94}, {'product_id': 15, 'avg_order_price': 19.950000000000003}, {'product_id': 16, 'avg_order_price': 
+    949.8100000000001}, {'product_id': 17, 'avg_order_price': 362.35499999999996}, {'product_id': 18, 
+    'avg_order_price': None}, {'product_id': 19, 'avg_order_price': 19.99}, {'product_id': 20, 'avg_order _price': 
+    29.94}, {'product_id': 21, 'avg_order_price': None}, {'product_id': 22, 'avg_order_price': None}, {'product_id': 
+    23, 'avg_order_price': 223.92}, {'product_id': 24, 'avg_order_price': 41.85}, {'product_id': 25, 
+    'avg_order_price': 134.91}]"""
+
+
+    """
+        SELECT sqla_product.id AS product_id, avg(sqla_product.price * sqla_order.quantity) AS avg_order_price 
+        FROM sqla_product 
+        LEFT OUTER JOIN sqla_order 
+        ON sqla_product.id = sqla_order.product_id 
+        GROUP BY sqla_product.id 
+        ORDER BY sqla_product.id
+    """
+
+
 if __name__ == "__main__":
     # asyncio.run(apply_tables())
     # asyncio.run(insert_product())
@@ -262,7 +296,8 @@ if __name__ == "__main__":
     # asyncio.run(right_join())
     # asyncio.run(aggregation_count())
     # asyncio.run(aggregation_count_correct())
-    asyncio.run(aggregation_sum())
+    # asyncio.run(aggregation_sum())
+    asyncio.run(aggregation_avg())
 
 # from sqlalchemy import create_engine
 #
