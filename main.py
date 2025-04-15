@@ -174,6 +174,24 @@ async def left_join():
     """
 
 
+async def right_join():
+    # PyProduct is the parent class , PyOrder is the child classs
+    engine = get_engine()
+    query = (
+        sqla.select(PyProduct, PyOrder)
+        .select_from(PyOrder.__table__.outerjoin(PyProduct.__table__, PyProduct.id == PyOrder.product_id))
+    )
+    async with engine.begin() as conn:
+        result = await conn.execute(query)
+    print([x._asdict() for x in result.all()])
+
+    """
+    SELECT sqla_product.id, sqla_product.name, sqla_product.price, sqla_product.available_quantity, sqla_product.production_date, sqla_product.expiry_date, sqla_product.expiry_offset_months, sqla_order.id AS id_1, sqla_order.quantity, sqla_order.order_date, sqla_order.product_id
+    FROM sqla_order LEFT OUTER JOIN sqla_product ON sqla_order.product_id = sqla_product.id
+    """
+
+
+
 if __name__ == "__main__":
     # asyncio.run(apply_tables())
     # asyncio.run(insert_product())
@@ -183,7 +201,8 @@ if __name__ == "__main__":
     # asyncio.run(update_product())
     # asyncio.run(delete_product())
     # asyncio.run(inner_join())
-    asyncio.run(left_join())
+    # asyncio.run(left_join())
+    asyncio.run(right_join())
 
 # from sqlalchemy import create_engine
 #
