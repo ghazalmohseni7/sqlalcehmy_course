@@ -272,7 +272,6 @@ async def aggregation_avg():
     23, 'avg_order_price': 223.92}, {'product_id': 24, 'avg_order_price': 41.85}, {'product_id': 25, 
     'avg_order_price': 134.91}]"""
 
-
     """
         SELECT sqla_product.id AS product_id, avg(sqla_product.price * sqla_order.quantity) AS avg_order_price 
         FROM sqla_product 
@@ -280,6 +279,40 @@ async def aggregation_avg():
         ON sqla_product.id = sqla_order.product_id 
         GROUP BY sqla_product.id 
         ORDER BY sqla_product.id
+    """
+
+
+async def aggregation_min_max():
+    engine = get_engine()
+    query1 = (
+        sqla.select(PyProduct.id.label("product_id"),
+                    sqla.func.max(sqla.func.avg(PyProduct.price * PyOrder.quantity)).label("max_avg_order_price"),
+                    sqla.func.min(sqla.func.avg(PyProduct.price * PyOrder.quantity)).label("min_avg_order_price"),
+
+                    ).select_from(
+            PyProduct.__table__.outerjoin(PyOrder.__table__, PyProduct.id == PyOrder.product_id)).group_by(
+            PyProduct.id).order_by(PyProduct.id)
+    )  # psql do not allows us to do nested aggregations
+
+    query = (
+        sqla.select(
+                    sqla.func.max(PyOrder.quantity).label("max_order_quantity"),
+                    sqla.func.min(PyOrder.quantity).label("min_order_quantity"),
+
+                    ).select_from(
+            PyProduct.__table__.outerjoin(PyOrder.__table__, PyProduct.id == PyOrder.product_id))
+    )  # psql do not allows us to do nested aggregations
+    async with engine.begin() as conn:
+        result = await conn.execute(query)
+    print([x._asdict() for x in result.all()])
+
+    """print result :[{'max_order_quantity': 20, 'min_order_quantity': 1}]"""
+
+    """
+        SELECT max(sqla_order.quantity) AS max_order_quantity, min(sqla_order.quantity) AS min_order_quantity 
+        FROM sqla_product 
+        LEFT OUTER JOIN sqla_order 
+        ON sqla_product.id = sqla_order.product_id
     """
 
 
@@ -297,7 +330,8 @@ if __name__ == "__main__":
     # asyncio.run(aggregation_count())
     # asyncio.run(aggregation_count_correct())
     # asyncio.run(aggregation_sum())
-    asyncio.run(aggregation_avg())
+    # asyncio.run(aggregation_avg())
+    asyncio.run(aggregation_min_max())
 
 # from sqlalchemy import create_engine
 #
