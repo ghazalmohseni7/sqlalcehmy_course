@@ -148,6 +148,12 @@ async def inner_join():
     """
     note : the PyOrder or PyProduct are python class not a real table , so if we want to convert them to table we use : .__table__
     """
+    """
+    sql equivalnet :
+    SELECT sqla_product.id, sqla_product.name, sqla_product.price, sqla_product.available_quantity, sqla_product.production_date, sqla_product.expiry_date, sqla_product.expiry_offset_months, sqla_order.id AS id_1, sqla_order.quantity, sqla_order.order_date, sqla_order.product_id
+    FROM sqla_product JOIN sqla_order 
+    ON sqla_product.id = sqla_order.product_id
+    """
 
 
 if __name__ == "__main__":
