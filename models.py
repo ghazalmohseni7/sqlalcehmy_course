@@ -1,7 +1,8 @@
 from datetime import datetime, date
-from sqlalchemy import types, ForeignKey
+from sqlalchemy import types, ForeignKey, Index
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from db import Base
+
 
 #
 # class PyUser(Base):
@@ -53,3 +54,27 @@ from db import Base
 #         FOREIGN KEY(product_id) REFERENCES sqla_product (id) ON DELETE CASCADE
 #     )
 #     """
+
+class UserWithIndex(Base):
+    __tablename__ = "users_with_index"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(types.String(255), nullable=False)
+
+    __table_args__ = (
+        Index("idx_customers_email", "email"),
+        # This creates an index on the email column , the index name is idx_customers_email
+    )
+    """
+    two sql commands will run in one transaction:
+    
+    CREATE TABLE users_with_index (
+        id SERIAL NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        PRIMARY KEY (id)
+    )
+    
+    
+    CREATE INDEX idx_customers_email ON users_with_index (email)
+    
+    and this because i use the .begin() method and psql  . for example mysql will run them sequentially
+    """

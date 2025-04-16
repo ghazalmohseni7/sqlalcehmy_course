@@ -24,7 +24,7 @@ async def apply_tables() -> None:
             # result = await conn.execute(text('SELECT version();'))
             # version = result.all()[0]  # Get the first column of the first row
             # print(f"Connected to: {version}")
-            await conn.run_sync(Base.metadata.drop_all)  # Drop tables if they exist
+            # await conn.run_sync(Base.metadata.drop_all)  # Drop tables if they exist
             await conn.run_sync(Base.metadata.create_all)  # Create the tables
             print("Tables applied successfully.")
             print(
@@ -346,7 +346,7 @@ async def aggregation_avg_having():
 
 
 if __name__ == "__main__":
-    # asyncio.run(apply_tables())
+    asyncio.run(apply_tables())
     # asyncio.run(insert_product())
     # asyncio.run(select_star())
     # asyncio.run(select_some_columns())
@@ -361,7 +361,7 @@ if __name__ == "__main__":
     # asyncio.run(aggregation_sum())
     # asyncio.run(aggregation_avg())
     # asyncio.run(aggregation_min_max())
-    asyncio.run(aggregation_avg_having())
+    # asyncio.run(aggregation_avg_having())
 
 # from sqlalchemy import create_engine
 #
