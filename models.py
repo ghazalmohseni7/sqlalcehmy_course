@@ -1,5 +1,5 @@
 from datetime import datetime, date
-from sqlalchemy import types, ForeignKey, Index
+from sqlalchemy import types, ForeignKey, Index, ForeignKeyConstraint , UniqueConstraint
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from db import Base
 
@@ -55,26 +55,49 @@ from db import Base
 #     )
 #     """
 
-class UserWithIndex(Base):
-    __tablename__ = "users_with_index"
+# class UserWithIndex(Base):
+#     __tablename__ = "users_with_index"
+#     id: Mapped[int] = mapped_column(primary_key=True)
+#     email: Mapped[str] = mapped_column(types.String(255), nullable=False)
+#
+#     __table_args__ = (
+#         Index("idx_customers_email", "email"),
+#         # This creates an index on the email column , the index name is idx_customers_email
+#     )
+#     """
+#     two sql commands will run in one transaction:
+#
+#     CREATE TABLE users_with_index (
+#         id SERIAL NOT NULL,
+#         email VARCHAR(255) NOT NULL,
+#         PRIMARY KEY (id)
+#     )
+#
+#
+#     CREATE INDEX idx_customers_email ON users_with_index (email)
+#
+#     and this because i use the .begin() method and psql  . for example mysql will run them sequentially
+#     """
+
+
+class ProductWithCompositeUniqueness(Base):
+    __tablename__ = "products_compostie_uniqueness"
+
     id: Mapped[int] = mapped_column(primary_key=True)
-    email: Mapped[str] = mapped_column(types.String(255), nullable=False)
+    name: Mapped[str] = mapped_column(types.String(50))
+    supplier_id: Mapped[int] = mapped_column()
 
     __table_args__ = (
-        Index("idx_customers_email", "email"),
-        # This creates an index on the email column , the index name is idx_customers_email
+        UniqueConstraint("name", "supplier_id", name="uq_product_supplier"),
     )
     """
-    two sql commands will run in one transaction:
-    
-    CREATE TABLE users_with_index (
+    CREATE TABLE products_compostie_uniqueness (
         id SERIAL NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        PRIMARY KEY (id)
+        name VARCHAR(50) NOT NULL,
+        supplier_id INTEGER NOT NULL,
+        PRIMARY KEY (id),
+        CONSTRAINT uq_product_supplier UNIQUE (name, supplier_id)
     )
-    
-    
-    CREATE INDEX idx_customers_email ON users_with_index (email)
-    
-    and this because i use the .begin() method and psql  . for example mysql will run them sequentially
     """
+
+
