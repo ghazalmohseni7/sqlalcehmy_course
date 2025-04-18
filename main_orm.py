@@ -79,6 +79,9 @@ async def insert_user_with_session() -> Dict[str, Any]:
         
         """
 
+        """sql equivalent of session.add: INSERT INTO sqla_user (username, age, work) VALUES ($1::VARCHAR, 
+        $2::INTEGER, $3::VARCHAR) RETURNING sqla_user.id"""
+
 
 if __name__ == "__main__":
     res = asyncio.run(insert_user_with_session())
