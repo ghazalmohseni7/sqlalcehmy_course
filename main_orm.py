@@ -115,7 +115,6 @@ async def select_star_user():
     2025-04-18 22:40:17,993 INFO sqlalchemy.engine.Engine COMMIT
     """
 
-
     """
     let's explainn something , when in core we say : result.all() it returns a list of rows ,
     but in ORM , this will returns a list or tuples of python objects:[(<PyUser(...)>,), (<PyUser(...)>,), ...] , 
@@ -125,7 +124,18 @@ async def select_star_user():
     """
 
 
+async def select_with_where():
+    engine = get_engine()
+    async_session = async_sessionmaker(bind=engine)
+    async with async_session() as session:
+        async with session.begin():
+            query = sqla.select(PyUser).where((PyUser.age >= 20) & (PyUser.age <= 80))
+            result = await session.execute(query)
+            print([x.to_dict() for x in result.scalars().all()])
+
+
 if __name__ == "__main__":
     # res = asyncio.run(insert_user_with_session())
     # print("main : insert_user_with_session : ", res)
-    asyncio.run(select_star_user())
+    # asyncio.run(select_star_user())
+    asyncio.run(select_with_where())
