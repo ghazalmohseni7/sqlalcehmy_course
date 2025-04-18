@@ -1,9 +1,10 @@
 import sys
 import random
 import asyncio
+from typing import Dict, Any
 from faker import Faker
 import sqlalchemy as sqla
-from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 from models import *
 from db import get_engine
 
@@ -13,15 +14,15 @@ if sys.platform:
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
-async def insert_user_with_session():
+async def insert_user_with_session() -> Dict[str, Any]:
     engine = get_engine()
-    async_session = async_sessionmaker(bind=engine)  # this is a class
+    async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(bind=engine)  # this is a class
     user = PyUser(
         username=fake.word(),
         age=random.randint(1, 100),
         work=fake.word()
     )  # this is a dataclass just for now
-    async with async_session() as session:
+    async with async_session() as session: # session also is type of AsyncSession
         async with session.begin():
             print("add user to session ")
             session.add(user)  # now the user obj is in session memory / add is not async so no need for await
