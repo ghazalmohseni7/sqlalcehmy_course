@@ -22,7 +22,7 @@ async def insert_user_with_session() -> Dict[str, Any]:
         age=random.randint(1, 100),
         work=fake.word()
     )  # this is a dataclass just for now
-    async with async_session() as session: # session also is type of AsyncSession
+    async with async_session() as session:  # session also is type of AsyncSession
         async with session.begin():
             print("add user to session ")
             session.add(user)  # now the user obj is in session memory / add is not async so no need for await
@@ -83,6 +83,49 @@ async def insert_user_with_session() -> Dict[str, Any]:
         $2::INTEGER, $3::VARCHAR) RETURNING sqla_user.id"""
 
 
+async def select_star_user():
+    engine = get_engine()
+    async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(bind=engine)
+    async with async_session() as session:
+        async with session.begin():
+            query = sqla.select(PyUser)
+            result = await session.execute(query)
+            res = result.scalars().all()  # actually you can not fetch rows after session ends so write this code before session ends
+            print([x.to_dict() for x in res])  # now x is an instance of PyUser so we can apply the to_dict()
+    # resall=result.all()
+    # print([x._asdict() for x in resall]) # [{'PyUser': <models.PyUser object at 0x000001712E60A380>},
+    # # {'PyUser': <models.PyUser object at 0x000001712E60A350>}, {'PyUser': <models.PyUser object at
+    # # 0x000001712E60A2F0>}, {'PyUser': <models.PyUser object at 0x000001712E60A290>}, {'PyUser': <models.PyUser
+    # # object at 0x000001712E60A230>}, {'PyUser': <models.PyUser object at 0x000001712E60A1D0>}] so in the orm ,
+    # # the enigne get the rows of the table(like what we hve in core) but then orm converts the rows to the instances
+    # # of the PyUser class , so we need to convert these PyUser classes to dict
+    # print("////////////////")
+    # print([x._asdict()["PyUser"].to_dict() for x in resall])
+
+    """
+    sql equivalent :
+    SELECT sqla_user.id, sqla_user.username, sqla_user.age, sqla_user.work 
+    FROM sqla_user
+    """
+
+    """
+    result:
+    [{'id': 1, 'username': 'meet', 'age': 46, 'work': 'case'}, {'id': 2, 'username': 'chair', 'age': 77, 'work': 'quality'}, {'id': 3, 'username': 'western', 'age': 14, 'work': 'accept
+    '}, {'id': 4, 'username': 'instead', 'age': 54, 'work': 'event'}, {'id': 5, 'username': 'option', 'age': 8, 'work': 'strong'}, {'id': 6, 'username': 'population', 'age': 6, 'work': 'why'}]
+    2025-04-18 22:40:17,993 INFO sqlalchemy.engine.Engine COMMIT
+    """
+
+
+    """
+    let's explainn something , when in core we say : result.all() it returns a list of rows ,
+    but in ORM , this will returns a list or tuples of python objects:[(<PyUser(...)>,), (<PyUser(...)>,), ...] , 
+    so print([x._asdict()["PyUser"].to_dict() for x in resall]) wont work on it cause x is a tuple ,
+    so we should use .scalars() which extract the first value of all of the tuples and creates a list with them , and we will get list[PyUser] 
+    which later we can apply the .to_dict method on them.
+    """
+
+
 if __name__ == "__main__":
-    res = asyncio.run(insert_user_with_session())
-    print("main : insert_user_with_session : ", res)
+    # res = asyncio.run(insert_user_with_session())
+    # print("main : insert_user_with_session : ", res)
+    asyncio.run(select_star_user())
