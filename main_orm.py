@@ -241,12 +241,30 @@ async def join():
     
     """
 
-
     """
     sql equivalent:
         SELECT sqla_product.id, sqla_product.name, sqla_product.price, sqla_product.available_quantity, sqla_product.production_date, sqla_product.expiry_date, sqla_product.expiry_offset_months, sqla_order.id AS id_1, sqla_order.quantity, sqla_order.order_date, sqla_order.product_id
         FROM sqla_product JOIN sqla_order 
         ON sqla_product.id = sqla_order.product_id
+    """
+
+
+async def left_join():
+    engine = get_engine()
+    async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(bind=engine)
+    async with async_session() as session:
+        async with session.begin():
+            query = sqla.select(PyProduct, PyOrder).outerjoin(PyOrder, PyProduct.id == PyOrder.product_id).where(
+                PyOrder.order_date >= date(year=2012, month=1, day=1))
+            result = await session.execute(query)
+            rows = result.all()
+            for product, order in rows:
+                print(product.to_dict(), order.to_dict())
+    """
+    sql equivalent:
+        SELECT sqla_product.id, sqla_product.name, sqla_product.price, sqla_product.available_quantity, sqla_product.production_date, sqla_product.expiry_date, sqla_product.expiry_offset_months, sqla_order.id AS id_1, sqla_order.quantity, sqla_order.order_date, sqla_order.product_id
+        FROM sqla_product LEFT OUTER JOIN sqla_order ON sqla_product.id = sqla_order.product_id
+        WHERE sqla_order.order_date >= $1::DATE
     """
 
 
@@ -258,4 +276,5 @@ if __name__ == "__main__":
     # asyncio.run(select_some_columns())
     # asyncio.run(delete_user())
     # asyncio.run(update_user())
-    asyncio.run(join())
+    # asyncio.run(join())
+    asyncio.run(left_join())
