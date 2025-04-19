@@ -47,6 +47,17 @@ class PyProduct(Base):
     expiry_date: Mapped[date] = mapped_column(types.Date, nullable=True)
     expiry_offset_months: Mapped[int] = mapped_column(nullable=True)  # Example: 12 for a year
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "price": self.price,
+            "available_quantity": self.available_quantity,
+            "production_date": self.production_date,
+            "expiry_date": self.expiry_date,
+            "expiry_offset_months": self.expiry_offset_months
+        }
+
 
 class PyOrder(Base):
     __tablename__ = 'sqla_order'
@@ -54,6 +65,15 @@ class PyOrder(Base):
     quantity: Mapped[int] = mapped_column(nullable=False)
     order_date: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     product_id: Mapped[int] = mapped_column(ForeignKey(PyProduct.id, ondelete="CASCADE"))
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "quantity": self.quantity,
+            "order_date": self.order_date,
+            "product_id": self.product_id
+        }
+
     """
     CREATE TABLE sqla_order (
         id SERIAL NOT NULL,
