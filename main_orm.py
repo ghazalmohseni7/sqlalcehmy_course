@@ -126,7 +126,7 @@ async def select_star_user():
 
 async def select_with_where():
     engine = get_engine()
-    async_session = async_sessionmaker(bind=engine)
+    async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(bind=engine)
     async with async_session() as session:
         async with session.begin():
             query = sqla.select(PyUser).where((PyUser.age >= 20) & (PyUser.age <= 80))
@@ -141,8 +141,28 @@ async def select_with_where():
     """
 
 
+async def select_some_columns():
+    engine = get_engine()
+    async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(bind=engine)
+    async with async_session() as session:
+        async with session.begin():
+            query = sqla.select(PyUser.id, PyUser.age).where((PyUser.age >= 10) & (PyUser.age <= 50))
+            result = await session.execute(query)
+            print([x._asdict() for x in result.all()])
+    """
+    sql equivalent :
+        SELECT sqla_user.id, sqla_user.age
+        FROM sqla_user
+        WHERE sqla_user.age >= $1::INTEGER AND sqla_user.age <= $2::INTEGER
+    """
+    """
+    cause we do not fetch all columns it returns rows not python objects , so there is no need to use .scalars()
+    """
+
+
 if __name__ == "__main__":
     # res = asyncio.run(insert_user_with_session())
     # print("main : insert_user_with_session : ", res)
     # asyncio.run(select_star_user())
-    asyncio.run(select_with_where())
+    # asyncio.run(select_with_where())
+    asyncio.run(select_some_columns())
