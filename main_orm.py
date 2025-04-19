@@ -184,10 +184,41 @@ async def delete_user():
     """
 
 
+async def update_user():
+    engine = get_engine()
+    async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(bind=engine)
+    async with async_session() as session:
+        async with session.begin():
+            # load data to session
+            result = await session.execute(sqla.select(PyUser).where(PyUser.id == 2))
+            user = result.scalar_one_or_none()  # python object or None
+            if user:
+                user.age = 200
+                user.work = "cooko"  # now data is updated
+                # session.commit if you are not using the context manager , but now we are using it , so no need to
+                # write this line
+    """
+    sql equivalent:
+        UPDATE sqla_user SET age=$1::INTEGER, work=$2::VARCHAR WHERE sqla_user.id = $3::INTEGER
+    """
+    """
+    what terminal says : 
+        2025-04-19 14:43:05,035 INFO sqlalchemy.engine.Engine SELECT sqla_user.id, sqla_user.username, sqla_user.age, sqla_user.work 
+        FROM sqla_user
+        WHERE sqla_user.id = $1::INTEGER
+        2025-04-19 14:43:05,036 INFO sqlalchemy.engine.Engine [generated in 0.00072s] (2,)
+        2025-04-19 14:43:05,041 INFO sqlalchemy.engine.Engine UPDATE sqla_user SET age=$1::INTEGER, work=$2::VARCHAR WHERE sqla_user.id = $3::INTEGER
+        2025-04-19 14:43:05,042 INFO sqlalchemy.engine.Engine [generated in 0.00046s] (200, 'cooko', 2)
+        2025-04-19 14:43:05,052 INFO sqlalchemy.engine.Engine COMMIT
+
+    """
+
+
 if __name__ == "__main__":
     # res = asyncio.run(insert_user_with_session())
     # print("main : insert_user_with_session : ", res)
     # asyncio.run(select_star_user())
     # asyncio.run(select_with_where())
     # asyncio.run(select_some_columns())
-    asyncio.run(delete_user())
+    # asyncio.run(delete_user())
+    asyncio.run(update_user())
