@@ -133,6 +133,13 @@ async def select_with_where():
             result = await session.execute(query)
             print([x.to_dict() for x in result.scalars().all()])
 
+    """
+    sql equivalent
+    SELECT sqla_user.id, sqla_user.username, sqla_user.age, sqla_user.work 
+    FROM sqla_user
+    WHERE sqla_user.age >= $1::INTEGER AND sqla_user.age <= $2::INTEGER
+    """
+
 
 if __name__ == "__main__":
     # res = asyncio.run(insert_user_with_session())
