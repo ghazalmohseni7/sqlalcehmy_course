@@ -160,9 +160,34 @@ async def select_some_columns():
     """
 
 
+async def delete_user():
+    engine = get_engine()
+    async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(bind=engine)
+    async with async_session() as session:
+        async with session.begin():
+            row_query = sqla.select(PyUser).where(PyUser.id == 1)
+            row = await session.execute(row_query)
+            row_exist = row.scalar_one_or_none()  # this method returns python obj or none
+            # delete query:
+            if row_exist:
+                result = await session.delete(row_exist)
+
+    """
+    sql equivalent:
+        DELETE FROM sqla_user WHERE sqla_user.id = $1::INTEGER
+    """
+
+    """
+    note the in core we write : sqla.delete(PyUser).where(PyUser.id==1) but why we first fetch the row and then 
+    delete it with session ? cause we are using ORM not core , adn ORM works with session , so data should be in 
+    session
+    """
+
+
 if __name__ == "__main__":
     # res = asyncio.run(insert_user_with_session())
     # print("main : insert_user_with_session : ", res)
     # asyncio.run(select_star_user())
     # asyncio.run(select_with_where())
-    asyncio.run(select_some_columns())
+    # asyncio.run(select_some_columns())
+    asyncio.run(delete_user())
