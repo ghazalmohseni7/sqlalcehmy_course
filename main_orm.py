@@ -353,7 +353,7 @@ async def aggregation_avg():
     """
 
 
-async def aggregation_mon_max():
+async def aggregation_min_max():
     engine = get_engine()
     async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(bind=engine)
     async with async_session() as session:
@@ -365,6 +365,33 @@ async def aggregation_mon_max():
     sql equivalent:
         SELECT min(sqla_user.age) AS child, max(sqla_user.age) AS adult 
         FROM sqla_user
+    """
+
+
+async def aggregation_having():
+    engine = get_engine()
+    async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(bind=engine)
+    async with async_session() as session:
+        async with session.begin():
+            query = (
+                sqla.select(PyProduct.id, sqla.func.avg(PyProduct.price * PyOrder.quantity).label("avg_order_price"))
+                .outerjoin(PyOrder, PyProduct.id == PyOrder.product_id)
+                .group_by(PyProduct.id)
+                .having(sqla.func.avg(PyProduct.price * PyOrder.quantity) > 100)
+                .order_by(PyProduct.id)
+            )
+            result = await session.execute(query)
+            print([x._asdict() for x in result.all()])
+    """
+    sql equivalent:
+        SELECT sqla_product.id, avg(sqla_product.price * sqla_order.quantity) AS avg_order_price 
+        FROM sqla_product 
+        LEFT OUTER JOIN sqla_order 
+        ON sqla_product.id = sqla_order.product_id 
+        GROUP BY sqla_product.id
+        HAVING avg(sqla_product.price * sqla_order.quantity) > $1::INTEGER 
+        ORDER BY sqla_product.id
+
     """
 
 
@@ -382,4 +409,5 @@ if __name__ == "__main__":
     # asyncio.run(aggregation_count())
     # asyncio.run(aggregation_sum())
     # asyncio.run(aggregation_avg())
-    asyncio.run(aggregation_mon_max())
+    # asyncio.run(aggregation_min_max())
+    asyncio.run(aggregation_having())
