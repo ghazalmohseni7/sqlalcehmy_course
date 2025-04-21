@@ -307,6 +307,26 @@ async def aggregation_count():
         FROM sqla_user
     """
 
+
+async def aggregation_sum():
+    engine = get_engine()
+    async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(bind=engine)
+    async with async_session() as session:
+        async with session.begin():
+            query = sqla.select(PyOrder.product_id, sqla.func.sum(PyOrder.quantity).label("order_per_product")).group_by(
+                PyOrder.product_id).order_by(PyOrder.product_id)
+            result = await session.execute(query)
+            print([x._asdict() for x in result.all()])
+
+    """
+    sql equivalent:
+        SELECT sqla_order.product_id, sum(sqla_order.quantity) AS order_per_product
+        FROM sqla_order 
+        GROUP BY sqla_order.product_id 
+        ORDER BY sqla_order.product_id
+    """
+
+
 if __name__ == "__main__":
     # res = asyncio.run(insert_user_with_session())
     # print("main : insert_user_with_session : ", res)
@@ -318,4 +338,5 @@ if __name__ == "__main__":
     # asyncio.run(join())
     # asyncio.run(left_join())
     # asyncio.run(right_join())
-    asyncio.run(aggregation_count())
+    # asyncio.run(aggregation_count())
+    asyncio.run(aggregation_sum())
