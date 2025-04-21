@@ -292,6 +292,21 @@ async def right_join():
     """
 
 
+async def aggregation_count():
+    engine = get_engine()
+    async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(bind=engine)
+    async with async_session() as session:
+        async with session.begin():
+            query = sqla.select(sqla.func.count(PyUser.id).label("LEN"))
+            result = await session.execute(query)
+            print(result.first()._asdict())
+
+    """
+    sql equivalent:
+        SELECT count(sqla_user.id) AS "LEN"
+        FROM sqla_user
+    """
+
 if __name__ == "__main__":
     # res = asyncio.run(insert_user_with_session())
     # print("main : insert_user_with_session : ", res)
@@ -302,4 +317,5 @@ if __name__ == "__main__":
     # asyncio.run(update_user())
     # asyncio.run(join())
     # asyncio.run(left_join())
-    asyncio.run(right_join())
+    # asyncio.run(right_join())
+    asyncio.run(aggregation_count())
