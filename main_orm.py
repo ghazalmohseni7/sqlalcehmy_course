@@ -313,7 +313,8 @@ async def aggregation_sum():
     async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(bind=engine)
     async with async_session() as session:
         async with session.begin():
-            query = sqla.select(PyOrder.product_id, sqla.func.sum(PyOrder.quantity).label("order_per_product")).group_by(
+            query = sqla.select(PyOrder.product_id,
+                                sqla.func.sum(PyOrder.quantity).label("order_per_product")).group_by(
                 PyOrder.product_id).order_by(PyOrder.product_id)
             result = await session.execute(query)
             print([x._asdict() for x in result.all()])
@@ -324,6 +325,46 @@ async def aggregation_sum():
         FROM sqla_order 
         GROUP BY sqla_order.product_id 
         ORDER BY sqla_order.product_id
+    """
+
+
+async def aggregation_avg():
+    engine = get_engine()
+    async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(bind=engine)
+    async with async_session() as session:
+        async with session.begin():
+            query = (
+                sqla.select(PyProduct.id, sqla.func.avg(PyProduct.price * PyOrder.quantity).label("avg_order_price"))
+                .outerjoin(PyOrder, PyProduct.id == PyOrder.product_id)
+                .group_by(PyProduct.id)
+                .order_by(PyProduct.id)
+            )
+            result = await session.execute(query)
+            print([x._asdict() for x in result.all()])
+    """
+    sql equivalent:
+        SELECT sqla_product.id, avg(sqla_product.price * sqla_order.quantity) AS avg_order_price 
+        FROM sqla_product 
+        LEFT OUTER JOIN sqla_order 
+        ON sqla_product.id = sqla_order.product_id 
+        GROUP BY sqla_product.id 
+        ORDER BY sqla_product.id
+
+    """
+
+
+async def aggregation_mon_max():
+    engine = get_engine()
+    async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(bind=engine)
+    async with async_session() as session:
+        async with session.begin():
+            query = sqla.select(sqla.func.min(PyUser.age).label("child"), sqla.func.max(PyUser.age).label("adult"))
+            result = await session.execute(query)
+            print([x._asdict() for x in result.all()])
+    """
+    sql equivalent:
+        SELECT min(sqla_user.age) AS child, max(sqla_user.age) AS adult 
+        FROM sqla_user
     """
 
 
@@ -339,4 +380,6 @@ if __name__ == "__main__":
     # asyncio.run(left_join())
     # asyncio.run(right_join())
     # asyncio.run(aggregation_count())
-    asyncio.run(aggregation_sum())
+    # asyncio.run(aggregation_sum())
+    # asyncio.run(aggregation_avg())
+    asyncio.run(aggregation_mon_max())
