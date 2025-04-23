@@ -1,3 +1,4 @@
+import os
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
@@ -5,25 +6,30 @@ from sqlalchemy import pool
 
 from alembic import context
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
+from dotenv import load_dotenv
+from models import *
+from db import Base
+
+load_dotenv()
+
+db_name: str = os.getenv("DB_NAME")
+test_db_name: str = os.getenv("TEST_DB_NAME")
+db_port: int = int(os.getenv("DB_PORT"))
+db_host: str = os.getenv("DB_HOST")
+db_username: str = os.getenv("DB_USERNAME")
+db_password: str = os.getenv("DB_PASSWORD")
+db_type: str = os.getenv("DB_TYPE")
+db_driver: str = os.getenv("DB_SYNC_DRIVER")
+dialect: str = f"{db_type}+{db_driver}://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}"
+print("env.py:dialect:   , ", dialect)
 config = context.config
 
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-target_metadata = None
+config.set_section_option(section="devdb", name="sqlalchemy.url", value=dialect)
 
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
