@@ -130,3 +130,8 @@ class ProductWithCompositeUniqueness(Base):
         CONSTRAINT uq_product_supplier UNIQUE (name, supplier_id)
     )
     """
+
+
+class Category(Base):
+    __tablename__ = 'sqla_catgory'
+    id: Mapped[int] = mapped_column(primary_key=True)
