@@ -12,7 +12,13 @@ from db import Base
 
 load_dotenv()
 
-db_name: str = os.getenv("DB_NAME")
+is_test: str = os.getenv("IS_TEST")
+if is_test == "False":
+    db_name: str = os.getenv("DB_NAME")
+elif is_test == "True":
+    db_name: str = os.getenv("TEST_DB_NAME")
+db_port: int = int(os.getenv("DB_PORT"))
+# db_name: str = os.getenv("DB_NAME")
 test_db_name: str = os.getenv("TEST_DB_NAME")
 db_port: int = int(os.getenv("DB_PORT"))
 db_host: str = os.getenv("DB_HOST")
@@ -28,6 +34,7 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 config.set_section_option(section="devdb", name="sqlalchemy.url", value=dialect)
+config.set_section_option(section="testdb", name="sqlalchemy.url", value=dialect)
 
 target_metadata = Base.metadata
 
