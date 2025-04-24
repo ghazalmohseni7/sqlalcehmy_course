@@ -13,7 +13,11 @@ load_dotenv()
 
 @lru_cache
 def get_engine() -> AsyncEngine:
-    db_name: str = os.getenv("DB_NAME")
+    is_test: str = os.getenv("IS_TEST")
+    if is_test == "False":
+        db_name: str = os.getenv("DB_NAME")
+    elif is_test == "True":
+        db_name: str = os.getenv("TEST_DB_NAME")
     db_port: int = int(os.getenv("DB_PORT"))
     db_host: str = os.getenv("DB_HOST")
     db_username: str = os.getenv("DB_USERNAME")
