@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 def event_loop():
     # this fixture returns the asyncio event loop
     loop = asyncio.get_event_loop()
+    # loop = asyncio.get_event_loop() is deprecated and python suggest using get_running_event but it didnt work for me
     print(f"***************************************************clsEvent Loop ID (Fixture event_loop): {id(loop)}")
     yield loop
     # loop.close()
@@ -18,6 +19,8 @@ def event_loop():
 async def async_engine():
     engine = get_engine()  # Ensure get_engine is correctly implemented elsewhere
     loop = asyncio.get_event_loop()
+    # this loop here is just for the print , there is no other usage
+
     print(f"***************************************************Event Loop ID (Fixture async_engine): {id(loop)}")
     yield engine
     await engine.dispose()
@@ -26,6 +29,7 @@ async def async_engine():
 # Setup and teardown database fixture
 @pytest.fixture(scope="session", autouse=True)
 async def setup_database(async_engine):
+    # this loop here is just for the print , there is no other usage
     loop = asyncio.get_event_loop()
     print(f"***************************************************Event Loop ID (Fixture setup_database): {id(loop)}")
     # Set up the database (create tables)
@@ -42,6 +46,7 @@ async def setup_database(async_engine):
 # Async session fixture
 @pytest.fixture
 async def async_session(async_engine):
+    # this loop here is just for the print , there is no other usage
     loop = asyncio.get_event_loop()
     print(f"***************************************************Event Loop ID (Fixture async_session1): {id(loop)}")
     # Create a session factory
