@@ -59,8 +59,12 @@ async def async_session(async_engine):
     async with async_session_factory() as session:
         yield session
 
+
 # @pytest.fixture(scope="session", autouse=True)
 # def apply_test_migrations():
+#     from alembic.config import Config
+#     from alembic import command
+#
 #     print("1. lets load alembic.ini file:")
 #     # 1. lets load alembic.ini file:
 #     alembic_cfg = Config("alembic.ini")
@@ -74,4 +78,3 @@ async def async_session(async_engine):
 #         print("Migration applied successfully!")
 #     except Exception as e:
 #         print(f"Error during migration: {e}")
-#
