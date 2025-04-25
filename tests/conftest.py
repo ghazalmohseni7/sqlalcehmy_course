@@ -41,7 +41,7 @@ async def setup_database(async_engine):
 
 # Async session fixture
 @pytest.fixture
-async def async_session1(async_engine):
+async def async_session(async_engine):
     loop = asyncio.get_event_loop()
     print(f"***************************************************Event Loop ID (Fixture async_session1): {id(loop)}")
     # Create a session factory
